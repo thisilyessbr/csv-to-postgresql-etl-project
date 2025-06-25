@@ -21,7 +21,7 @@ class Config:
 
     # File paths
     DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
-    DATA_DATA_DIR = os.path.join(DATA_DIR, 'raw')
+    RAW_DATA_DIR = os.path.join(DATA_DIR, 'raw')
     PROCESSED_DATA_DIR = os.path.join(DATA_DIR, 'raw')
     LOGS_DIR = os.path.join(DATA_DIR, 'logs')
 
