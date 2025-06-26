@@ -2,12 +2,10 @@ from sqlalchemy import Column, DECIMAL, Integer, String, DateTime, Text, CheckCo
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 
-
 Base = declarative_base()
 
 
 class NYCTaxiTrip(Base):
-
     __tablename__ = 'nyc_taxi_trips'
 
     id = Column(Integer, primary_key=True)
@@ -40,8 +38,8 @@ class NYCTaxiTrip(Base):
         CheckConstraint('total_amount >= 0', name='valid_total_amount'),
     )
 
-class ETLLog(Base):
 
+class ETLLog(Base):
     __tablename__ = 'etl_log'
 
     id = Column(Integer, primary_key=True)
