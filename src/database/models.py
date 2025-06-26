@@ -30,14 +30,6 @@ class NYCTaxiTrip(Base):
     total_amount = Column(DECIMAL(10, 2))
     created_at = Column(DateTime, default=func.now())
 
-    __table_args__ = (
-        CheckConstraint('dropoff_datetime > pickup_datetime', name='valid_trip_times'),
-        CheckConstraint('passenger_count > 0 AND passenger_count <= 8', name='valid_passenger_count'),
-        CheckConstraint('trip_distance >= 0', name='valid_trip_distance'),
-        CheckConstraint('fare_amount >= 0', name='valid_fare_amount'),
-        CheckConstraint('total_amount >= 0', name='valid_total_amount'),
-    )
-
 
 class ETLLog(Base):
     __tablename__ = 'etl_log'

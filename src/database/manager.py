@@ -20,11 +20,23 @@ class DatabaseManager:
         self.SessionLocal = None
         self._connection_pool = None
 
+    def _create_psycopg2_connection(self):
+        """Custom connection creator that forces psycopg2 to use TCP"""
+        return psycopg2.connect(
+            host=self.config.POSTGRES_HOST,
+            port=self.config.POSTGRES_PORT,
+            database=self.config.POSTGRES_DB,
+            user=self.config.POSTGRES_USER,
+            password=self.config.POSTGRES_PASSWORD
+        )
+
     def connect(self) -> bool:
-        """Create database connection with connection pooling"""
+        """Create database connection with connection pooling using working Solution 3"""
         try:
+            # Use the custom connection creator that worked in your tests
             self.engine = create_engine(
                 self.config.database_url,
+                creator=self._create_psycopg2_connection,
                 pool_size=10,
                 max_overflow=20,
                 pool_pre_ping=True,  # Validate connections before use
@@ -39,7 +51,7 @@ class DatabaseManager:
                 bind=self.engine
             )
 
-            logger.info("Database connection established successfully")
+            logger.info("Database connection established successfully using custom psycopg2 creator")
             return True
 
         except Exception as e:
