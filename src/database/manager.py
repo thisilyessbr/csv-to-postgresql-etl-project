@@ -99,8 +99,6 @@ class DatabaseManager:
          CREATE INDEX IF NOT EXISTS idx_trip_distance ON nyc_taxi_trips(trip_distance);
          CREATE INDEX IF NOT EXISTS idx_total_amount ON nyc_taxi_trips(total_amount);
          CREATE INDEX IF NOT EXISTS idx_vendor_payment ON nyc_taxi_trips(vendor_id, payment_type);
-         CREATE INDEX IF NOT EXISTS idx_pickup_location ON nyc_taxi_trips(pickup_latitude, pickup_longitude);
-         CREATE INDEX IF NOT EXISTS idx_dropoff_location ON nyc_taxi_trips(dropoff_latitude, dropoff_longitude);
 
          -- Indexes for etl_log
          CREATE INDEX IF NOT EXISTS idx_etl_log_pipeline ON etl_log(pipeline_name);

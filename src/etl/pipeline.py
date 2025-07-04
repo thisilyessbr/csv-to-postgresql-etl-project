@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Dict, Any
 from src.etl.extractor import DataExtractor
-from src.etl.transformer import DataTransformer
+from src.etl.spark_transformer import SparkDataTransformer
 from src.etl.loader import DataLoader
 from src.database.manager import DatabaseManager
 
@@ -13,7 +13,7 @@ class NYCTaxiETLPipeline:
 
     def __init__(self):
         self.extractor = DataExtractor()
-        self.transformer = DataTransformer()
+        self.transformer = SparkDataTransformer()
         self.loader = DataLoader()
         self.db_manager = DatabaseManager()
         self.pipeline_name = "nyc_taxi_etl"
@@ -29,6 +29,9 @@ class NYCTaxiETLPipeline:
             if not self.db_manager.connect():
                 raise Exception("Failed to connect to database")
 
+            if self.db_manager.connect():
+                self.db_manager.create_tables()
+
             # Log pipeline start
             log_id = self.loader.log_etl_run(
                 pipeline_name=self.pipeline_name,
@@ -42,10 +45,12 @@ class NYCTaxiETLPipeline:
 
             # Transform
             logger.info("Step 2: Transforming data")
-            transformed_data = self.transformer.transform(raw_data)
+            spark_df = self.transformer.read_parquet_files(raw_data)  # Read with Spark
+            transformed_spark_df = self.transformer.transform(spark_df)
 
             # Load
             logger.info("Step 3: Loading data")
+            transformed_data = transformed_spark_df.toPandas()
             self.loader.load_dataframe(transformed_data)
 
             # Log success
@@ -98,3 +103,4 @@ class NYCTaxiETLPipeline:
 
         finally:
             self.db_manager.close()
+

@@ -20,6 +20,48 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - app-network  # Add this
+
+  spark-master:
+    image: bitnami/spark:3.4
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - "8081:8080"
+      - "7077:7077"
+    volumes:
+      - ./data:/opt/bitnami/spark/data
+      - ./src:/opt/bitnami/spark/jobs
+      - ./logs:/opt/bitnami/spark/logs
+    networks:
+      - spark-network
+      - app-network  # Add this
+
+  spark-worker-1:
+    image: bitnami/spark:3.4
+    container_name: spark-worker-1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_CORES=2
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    depends_on:
+      - spark-master
+    volumes:
+      - ./data:/opt/bitnami/spark/data
+      - ./src:/opt/bitnami/spark/jobs
+    networks:
+      - spark-network
+      - app-network  # Add this
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -33,6 +75,8 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - app-network  # Add this
 
   etl_app:
     build: .
@@ -43,6 +87,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - SPARK_MASTER_URL=local[6]
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
@@ -50,6 +95,14 @@ services:
       postgres:
         condition: service_healthy
     restart: "no"
+    networks:
+      - app-network  # Add this
 
 volumes:
   postgres_data:
+
+networks:
+  spark-network:
+    driver: bridge
+  app-network:  # Add this network
+    driver: bridge
